@@ -1,0 +1,36 @@
+global:
+  max_failure_rate: 0.0
+  max_timed_xla_compile_total: 0
+  max_shape_contract_violation_total: 0
+  max_score_fastpath_non_success_total: 0
+
+run_contract:
+  required_concurrency: 16
+  min_timed_requests_per_repeat: 80
+  min_repeats_requested: 3
+
+workloads:
+  track_low:
+    min_throughput_items_per_sec: 420.0
+    max_p99_p50_ratio: 2.5
+    max_latency_p99_ms: 1200.0
+  track_mean:
+    min_throughput_items_per_sec: 835.0
+    max_p99_p50_ratio: 2.5
+    max_latency_p99_ms: 3700.0
+  track_high:
+    min_throughput_items_per_sec: 805.0
+    max_p99_p50_ratio: 2.5
+    max_latency_p99_ms: 5200.0
+  home_low:
+    min_throughput_items_per_sec: 275.0
+    max_p99_p50_ratio: 2.5
+    max_latency_p99_ms: 1000.0
+  home_mean:
+    min_throughput_items_per_sec: 685.0
+    max_p99_p50_ratio: 2.5
+    max_latency_p99_ms: 1600.0
+  home_high:
+    min_throughput_items_per_sec: 735.0
+    max_p99_p50_ratio: 2.6
+    max_latency_p99_ms: 11500.0

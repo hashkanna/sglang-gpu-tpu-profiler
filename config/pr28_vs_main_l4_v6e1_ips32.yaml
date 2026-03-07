@@ -1,0 +1,44 @@
+experiment:
+  name: "pr28-vs-main-l4-v6e1-ips32"
+  model: "Qwen/Qwen3-0.6B"
+
+backends:
+  gpu:
+    name: "PyTorch/GPU (sglang main)"
+    url: "http://localhost:30000"
+    hardware: "NVIDIA L4 (g2-standard-8)"
+    cost_per_hour: 0.95
+  tpu:
+    name: "JAX/TPU (PR#28 ips32)"
+    url: "http://localhost:30001"
+    hardware: "TPU v6e-1"
+    cost_per_hour: 1.25
+
+api:
+  endpoint: "/v1/score"
+
+workloads:
+  - name: "pr28_hotshape"
+    query_tokens: 2000
+    num_items: 500
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+  - name: "small_batch"
+    query_tokens: 120
+    num_items: 10
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+  - name: "medium_batch"
+    query_tokens: 500
+    num_items: 100
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+
+benchmark:
+  warmup_requests: 3
+  timed_requests: 10
+  concurrency: 1
+  timeout_sec: 300

@@ -1,0 +1,44 @@
+experiment:
+  name: "pr27-kernel-v11-vs-pytorch-gpu"
+  model: "Qwen/Qwen3-0.6B"
+
+backends:
+  gpu:
+    name: "PyTorch/GPU"
+    url: "http://localhost:30000"
+    hardware: "A100-80GB"
+    cost_per_hour: 3.67
+  tpu:
+    name: "JAX/TPU (PR#27 v11)"
+    url: "http://localhost:30001"
+    hardware: "TPU v6e"
+    cost_per_hour: 1.25
+
+api:
+  endpoint: "/v1/score"
+
+workloads:
+  - name: "pr27_hotshape"
+    query_tokens: 2000
+    num_items: 500
+    item_tokens: 20
+    label_token_ids: [9454, 2753]
+    apply_softmax: true
+  - name: "small_batch"
+    query_tokens: 120
+    num_items: 10
+    item_tokens: 20
+    label_token_ids: [9454, 2753]
+    apply_softmax: true
+  - name: "medium_batch"
+    query_tokens: 500
+    num_items: 100
+    item_tokens: 20
+    label_token_ids: [9454, 2753]
+    apply_softmax: true
+
+benchmark:
+  warmup_requests: 3
+  timed_requests: 10
+  concurrency: 1
+  timeout_sec: 300

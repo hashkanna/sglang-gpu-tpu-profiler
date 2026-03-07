@@ -1,0 +1,197 @@
+metadata:
+  name: "prod_scenario_scoring_baseline"
+  version: 1
+  description: "Production-shaped scoring baseline for Scenario 1 (Track) and Scenario 2 (Home)."
+  source_contract: "config/prod_scenarios_contract.yaml"
+
+experiment:
+  model: "Qwen/Qwen3-0.6B"
+  api_endpoint: "/v1/score"
+
+backends:
+  gpu:
+    name: "PyTorch/GPU (sglang main)"
+    hardware: "NVIDIA RTX Pro 6000"
+    cost_per_hour: 2.2
+    default_server_args:
+      - "python3"
+      - "-m"
+      - "sglang.launch_server"
+      - "--model-path"
+      - "Qwen/Qwen3-0.6B"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "30000"
+  tpu:
+    name: "JAX/TPU scoring API"
+    hardware: "TPU v6e-1"
+    cost_per_hour: 1.25
+    url: "http://127.0.0.1:30001"
+    repo_path: "/home/kanna/work/sglang-jax-pr27-prof"
+
+reproducibility:
+  random_seed: 20260301
+  profile_order:
+    - "track_low"
+    - "track_mean"
+    - "track_high"
+    - "home_low"
+    - "home_mean"
+    - "home_high"
+
+workloads:
+  - name: "track_low"
+    scenario: "track_scoring"
+    profile: "low"
+    query_tokens: 183
+    num_items: 16
+    item_tokens: 26
+    total_tokens_expected: 599
+    label_token_ids: [198]
+    apply_softmax: false
+
+  - name: "track_mean"
+    scenario: "track_scoring"
+    profile: "mean"
+    query_tokens: 420
+    num_items: 96
+    item_tokens: 55
+    total_tokens_expected: 5700
+    label_token_ids: [198]
+    apply_softmax: false
+
+  - name: "track_high"
+    scenario: "track_scoring"
+    profile: "high"
+    query_tokens: 483
+    num_items: 128
+    item_tokens: 63
+    total_tokens_expected: 8547
+    label_token_ids: [198]
+    apply_softmax: false
+
+  - name: "home_low"
+    scenario: "home_scoring"
+    profile: "low"
+    query_tokens: 155
+    num_items: 8
+    item_tokens: 30
+    total_tokens_expected: 395
+    label_token_ids: [198]
+    apply_softmax: false
+
+  - name: "home_mean"
+    scenario: "home_scoring"
+    profile: "mean"
+    query_tokens: 275
+    num_items: 34
+    item_tokens: 50
+    total_tokens_expected: 1975
+    label_token_ids: [198]
+    apply_softmax: false
+
+  - name: "home_high"
+    scenario: "home_scoring"
+    profile: "high"
+    query_tokens: 2375
+    num_items: 256
+    item_tokens: 70
+    total_tokens_expected: 20295
+    label_token_ids: [198]
+    apply_softmax: false
+
+benchmark:
+  warmup_requests: 3
+  timed_requests: 10
+  concurrency: 1
+  timeout_sec: 300
+  request_retry_attempts: 3
+  request_retry_backoff_sec: 0.25
+
+tpu_matrix:
+  items_per_step_candidates: [32, 64, 96, 128, 160]
+  max_running_requests: 96
+  multi_item_extend_batch_size: 64
+  multi_item_scoring_chunk_size: 256
+  precompile_token_paddings: [1024, 2048, 4096, 8192, 16384, 32768]
+  precompile_bs_paddings: [24, 64, 96]
+  stabilization_sleep_sec: 8.0
+  workload_warmup_attempts: 5
+  workload_warmup_backoff_sec: 2.0
+  align_items_per_step_with_workloads: true
+  auto_bump_lane_capacity_with_workload: false
+  lane_capacity_bump_cap: 128
+  warmup_all_shape_buckets: true
+  warmup_max_shape_bucket_requests: 64
+  allow_score_full_vocab_fallback: false
+  require_cache_transition_exercise: false
+  shape_contract:
+    enabled: true
+    use_token_ids: true
+    strict: true
+    query_token_buckets: [155, 183, 275, 420, 483, 1024, 2048, 2375]
+    item_token_buckets: [26, 30, 50, 55, 63, 70, 80, 100]
+    num_items_buckets: [1, 8, 16, 34, 96, 128, 256]
+    pad_token_id: 0
+    query_fill_token_id: 42
+    item_fill_token_id: 84
+  gate_max_p99_p50:
+    track_low: 5.0
+    track_mean: 4.5
+    track_high: 4.0
+    home_low: 5.0
+    home_mean: 4.5
+    home_high: 4.0
+
+tpu_server:
+  env:
+    SGLANG_RPA_KERNEL_V11: "1"
+    SGLANG_SCORE_FROM_CACHE_V2_ALLOW_REQPOOL_OVERSUBSCRIBE: "1"
+    MULTI_ITEM_ENABLE_SCORE_FROM_CACHE_V2: "1"
+    MULTI_ITEM_DISABLE_OVERLAP_SCHEDULE: "1"
+    MULTI_ITEM_MASK_IMPL: "dense"
+    MULTI_ITEM_SEGMENT_FALLBACK_THRESHOLD: "0"
+    MULTI_ITEM_SCORE_FASTPATH_LOG_METRICS: "1"
+    MULTI_ITEM_SCORE_LABEL_ONLY_LOGPROB: "1"
+  static_args:
+    - "--trust-remote-code"
+    - "--host"
+    - "0.0.0.0"
+    - "--device"
+    - "tpu"
+    - "--dtype"
+    - "bfloat16"
+    - "--tp-size"
+    - "1"
+    - "--mem-fraction-static"
+    - "0.7"
+    - "--max-prefill-tokens"
+    - "32768"
+    - "--chunked-prefill-size"
+    - "-1"
+    - "--disable-overlap-schedule"
+    - "--attention-backend"
+    - "fa"
+    - "--page-size"
+    - "64"
+    - "--multi-item-scoring-delimiter"
+    - "151643"
+    - "--max-multi-item-seq-len"
+    - "32768"
+    - "--max-multi-item-count"
+    - "1024"
+    - "--multi-item-mask-impl"
+    - "dense"
+    - "--multi-item-segment-fallback-threshold"
+    - "0"
+    - "--multi-item-enable-prefill-extend"
+    - "--multi-item-enable-score-from-cache-v2"
+    - "--multi-item-score-label-only-logprob"
+    - "--multi-item-score-fastpath-log-metrics"
+    - "--enable-scoring-cache"
+    - "--skip-server-warmup"
+    - "--enable-tokenizer-batch-encode"
+    - "--enable-tokenizer-batch-send"
+    - "--log-level"
+    - "info"

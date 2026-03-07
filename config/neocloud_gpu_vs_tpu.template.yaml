@@ -1,0 +1,55 @@
+experiment:
+  name: "${EXPERIMENT_NAME}"
+  model: "${MODEL_NAME}"
+
+backends:
+  gpu:
+    name: "${GPU_BACKEND_NAME}"
+    url: "${GPU_URL}"
+    hardware: "${GPU_HARDWARE}"
+    cost_per_hour: ${GPU_COST_PER_HOUR}
+  tpu:
+    name: "${TPU_BACKEND_NAME}"
+    url: "${TPU_URL}"
+    hardware: "${TPU_HARDWARE}"
+    cost_per_hour: ${TPU_COST_PER_HOUR}
+
+api:
+  endpoint: "${API_ENDPOINT}"
+
+workloads:
+  - name: "pr28_hotshape"
+    query_tokens: ${PR28_HOTSHAPE_QUERY_TOKENS}
+    num_items: ${PR28_HOTSHAPE_NUM_ITEMS}
+    item_tokens: ${PR28_HOTSHAPE_ITEM_TOKENS}
+    label_token_ids: [${LABEL_TOKEN_IDS}]
+    apply_softmax: ${APPLY_SOFTMAX}
+  - name: "small_batch"
+    query_tokens: ${SMALL_BATCH_QUERY_TOKENS}
+    num_items: ${SMALL_BATCH_NUM_ITEMS}
+    item_tokens: ${SMALL_BATCH_ITEM_TOKENS}
+    label_token_ids: [${LABEL_TOKEN_IDS}]
+    apply_softmax: ${APPLY_SOFTMAX}
+  - name: "medium_batch"
+    query_tokens: ${MEDIUM_BATCH_QUERY_TOKENS}
+    num_items: ${MEDIUM_BATCH_NUM_ITEMS}
+    item_tokens: ${MEDIUM_BATCH_ITEM_TOKENS}
+    label_token_ids: [${LABEL_TOKEN_IDS}]
+    apply_softmax: ${APPLY_SOFTMAX}
+
+benchmark:
+  warmup_requests: ${WARMUP_REQUESTS}
+  timed_requests: ${TIMED_REQUESTS}
+  concurrency: ${CONCURRENCY}
+  timeout_sec: ${TIMEOUT_SEC}
+
+metadata:
+  provider:
+    name: "${PROVIDER_NAME}"
+    region: "${PROVIDER_REGION}"
+    zone: "${PROVIDER_ZONE}"
+  gpu:
+    type: "${GPU_TYPE}"
+    ssh_host: "${GPU_SSH_HOST}"
+  tpu:
+    endpoint: "${TPU_URL}"

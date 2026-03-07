@@ -1,0 +1,40 @@
+experiment:
+  name: fresh-trackmean-hotshape-pr28-vs-rtxpro6000
+  model: Qwen/Qwen3-0.6B
+
+backends:
+  gpu:
+    name: PyTorch/GPU (sglang 0.5.9)
+    url: http://127.0.0.1:31000
+    hardware: NVIDIA RTX PRO 6000 Blackwell Server Edition
+    cost_per_hour: 2.2
+  tpu:
+    name: JAX/TPU (sglang-jax PR28)
+    url: http://127.0.0.1:31001
+    hardware: TPU v6e-1
+    cost_per_hour: 1.25
+
+api:
+  endpoint: /v1/score
+
+workloads:
+  - name: track_mean
+    query_tokens: 420
+    num_items: 96
+    item_tokens: 55
+    label_token_ids: [198]
+    apply_softmax: false
+  - name: pr28_hotshape
+    query_tokens: 2000
+    num_items: 500
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+
+benchmark:
+  warmup_requests: 3
+  timed_requests: 10
+  concurrency: 1
+  timeout_sec: 300
+  request_retry_attempts: 3
+  request_retry_backoff_sec: 0.25

@@ -1,0 +1,55 @@
+experiment:
+  name: "runpod-rtxpro6000-vs-tpu-20260228-short"
+  model: "Qwen/Qwen3-0.6B"
+
+backends:
+  gpu:
+    name: "PyTorch/GPU (RunPod RTX PRO 6000)"
+    url: "https://mustang-mini-birds-cuts.trycloudflare.com"
+    hardware: "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+    cost_per_hour: 0.95
+  tpu:
+    name: "JAX/TPU scoring API"
+    url: "http://127.0.0.1:30001"
+    hardware: "TPU v6e-1"
+    cost_per_hour: 1.25
+
+api:
+  endpoint: "/v1/score"
+
+workloads:
+  - name: "pr28_hotshape"
+    query_tokens: 2000
+    num_items: 500
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+  - name: "small_batch"
+    query_tokens: 120
+    num_items: 10
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+  - name: "medium_batch"
+    query_tokens: 500
+    num_items: 100
+    item_tokens: 20
+    label_token_ids: [198]
+    apply_softmax: false
+
+benchmark:
+  warmup_requests: 1
+  timed_requests: 3
+  concurrency: 1
+  timeout_sec: 300
+
+metadata:
+  provider:
+    name: "runpod"
+    region: "us"
+    zone: "unknown"
+  gpu:
+    type: "RTX PRO 6000 Blackwell Server Edition"
+    ssh_host: ""
+  tpu:
+    endpoint: "http://127.0.0.1:30001"

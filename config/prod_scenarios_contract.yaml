@@ -1,0 +1,74 @@
+metadata:
+  name: prod_scenarios_contract
+  version: 1
+  normalized_at: "2026-03-01"
+  owner: codex
+  source_document: "/Users/kanna/Downloads/sglang Scenario 1_ Track Scoring.md"
+
+schema:
+  token_unit: tokenizer_tokens
+  candidate_count_semantics: "Number of candidate items scored per request"
+  system_tokens_semantics: "Prompt/system/context tokens that are shared before candidate expansion"
+  candidate_tokens_semantics: "Token count per candidate item"
+  total_tokens_semantics: "system_tokens + (num_candidates * candidate_tokens)"
+
+scenarios:
+  track_scoring:
+    display_name: "Scenario 1: Track Scoring"
+    ranges:
+      system_tokens:
+        min: 183
+        max: 483
+      num_candidates:
+        min: 1
+        max: 256
+      candidate_tokens:
+        min: 26
+        max: 80
+      candidate_tokens_test_envelope:
+        min: 10
+        max: 100
+      total_tokens_observed:
+        min: 183
+        max: 8631
+        mean: 5700
+    derived_bounds:
+      total_tokens_formula_min: 209
+      total_tokens_formula_max: 20963
+    interpretation_notes:
+      - "Observed total-token min (183) is below strict formula min (209), indicating control/edge requests can omit candidate contribution in logs."
+      - "Benchmarking should still enforce candidate-count lower bound per selected profile in later tasks."
+
+  home_scoring:
+    display_name: "Scenario 2: Home Scoring"
+    ranges:
+      system_tokens:
+        min: 155
+        max: 2375
+      num_candidates:
+        min: 1
+        max: 256
+      candidate_tokens:
+        min: 30
+        max: 70
+      candidate_tokens_test_envelope:
+        min: 20
+        max: 100
+      total_tokens_observed:
+        min: 155
+        max: 20500
+        mean: 1975
+    derived_bounds:
+      total_tokens_formula_min: 185
+      total_tokens_formula_max: 20295
+    ambiguity_resolution:
+      field: total_tokens_observed.max
+      source_values: [20500, 205000]
+      resolved_value: 20500
+      resolution_method: "Use mathematically feasible upper bound from provided ranges; keep small reporting slack"
+      rationale:
+        - "Computed formula max is 2375 + (256 * 70) = 20295."
+        - "205000 is inconsistent with formula-derived bound and mean total tokens (1975)."
+        - "20500 is within rounding/slack distance of formula max and consistent with rest of scenario."
+    interpretation_notes:
+      - "Observed total-token min (155) is below strict formula min (185), suggesting some logs capture prompt-only or partial scoring paths."
